@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
-$LocalDC =$env:COMPUTERNAME
-$Domain =$env:USERDNSDOMAIN
+$LocalDC = $env:COMPUTERNAME
+$Domain = $env:USERDNSDOMAIN
 
 Write-Host "==================================================="
 Write-Host " PHASE 0: DISCOVERING PARTNER SERVER"
@@ -12,10 +12,10 @@ Write-Host "Local Domain Controller detected as: $LocalDC" -ForegroundColor Cyan
 $AutoPartner = ""
 try {
     $allDCs = Get-ADDomainController -Filter * | Select-Object -ExpandProperty Name
-    $otherDCs = @($allDCs | Where-Object { $_ -ne$LocalDC })
+    $otherDCs = @($allDCs | Where-Object { $_ -ne $LocalDC })
     
     if ($otherDCs.Count -eq 1) {
-        $AutoPartner =$otherDCs[0]
+        $AutoPartner = $otherDCs[0]
         Write-Host "Auto-detected a second Domain Controller in AD: $AutoPartner" -ForegroundColor Green
     }
 } catch {
@@ -23,11 +23,12 @@ try {
 }
 
 # Loop to ensure we get a valid Partner DC with working DNS
-$validDNS =$false
-$PartnerDC =$AutoPartner
+$validDNS = $false
+$PartnerDC = $AutoPartner
 
 while (-not $validDNS) {
-    if ([string]::IsNullOrWhiteSpace($PartnerDC)) {$PartnerDC = Read-Host "Please enter the exact hostname of the Partner DC (e.g., win00-DC2)"
+    if ([string]::IsNullOrWhiteSpace($PartnerDC)) {
+        $PartnerDC = Read-Host "Please enter the exact hostname of the Partner DC (e.g., win00-DC2)"
     }
 
     if ([string]::IsNullOrWhiteSpace($PartnerDC)) {
@@ -40,8 +41,8 @@ while (-not $validDNS) {
     try {
         $PartnerIP = (Resolve-DnsName -Name "$PartnerDC" -Type A).IPAddress | Select-Object -First 1
         $LocalIP = (Resolve-DnsName -Name "$LocalDC" -Type A).IPAddress | Select-Object -First 1
-        $validDNS =$true
-        Write-Host "[OK] DNS resolved successfully. IP of $PartnerDC is$PartnerIP`n" -ForegroundColor Green
+        $validDNS = $true
+        Write-Host "[OK] DNS resolved successfully. IP of $PartnerDC is $PartnerIP`n" -ForegroundColor Green
     } catch {
         Write-Warning "[!] Cannot find '$PartnerDC' in DNS. Please check the name or ensure the server is turned on and connected."
         $PartnerDC = "" # Clear the variable to force the prompt in the next loop iteration
@@ -58,10 +59,10 @@ try {
     $dhcpRole = Invoke-Command -ComputerName "$PartnerDC" -ScriptBlock { Get-WindowsFeature -Name DHCP }
     if ($dhcpRole.Installed) {
         Write-Host "[OK] DHCP Server Role is already installed on $PartnerDC." -ForegroundColor Green
-        $NeedsInstall = $false
+        $NeedsInstall =$false
     } else {
         Write-Host "[!] DHCP Server Role is missing on $PartnerDC and will be installed." -ForegroundColor Yellow
-        $NeedsInstall = $true
+        $NeedsInstall =$true
     }
 } catch {
     Write-Error "Failed to check DHCP Role on $PartnerDC. Error: $_"
@@ -71,12 +72,12 @@ try {
 # 2. Test if DC2 is already authorized in AD
 try {
     $authorizedServers = Get-DhcpServerInDC
-    if ($authorizedServers.DnsName -match $PartnerDC) {
+    if ($authorizedServers.DnsName -match$PartnerDC) {
         Write-Host "[OK] $PartnerDC is already authorized in Active Directory." -ForegroundColor Green
-        $NeedsAuth = $false
+        $NeedsAuth =$false
     } else {
         Write-Host "[!] $PartnerDC is not yet authorized in Active Directory." -ForegroundColor Yellow
-        $NeedsAuth = $true
+        $NeedsAuth =$true
     }
 } catch {
     Write-Error "Failed to check DHCP Authorization. Error: $_"
@@ -86,14 +87,13 @@ try {
 # 3. Test if Failover already exists
 try {
     $failoverName = "$LocalDC-$PartnerDC-Failover"
-    # Using SilentlyContinue here specifically because Get-DhcpServerv4Failover throws an error if it doesn't exist
-    $existingFailover = Get-DhcpServerv4Failover -ComputerName "$LocalDC" -ErrorAction SilentlyContinue | Where-Object {$_.Name -eq $failoverName}
+    $existingFailover = Get-DhcpServerv4Failover -ComputerName "$LocalDC" -ErrorAction SilentlyContinue | Where-Object {$_.Name -eq$failoverName}
     if ($existingFailover) {
         Write-Host "[OK] Failover partnership '$failoverName' already exists." -ForegroundColor Green
-        $NeedsFailover = $false
+        $NeedsFailover =$false
     } else {
         Write-Host "[!] Failover partnership is missing and will be created." -ForegroundColor Yellow
-        $NeedsFailover = $true
+        $NeedsFailover =$true
     }
 } catch {
     Write-Error "Failed to check existing Failover relationships. Error: $_"
@@ -152,10 +152,8 @@ if ($NeedsFailover) {
         $Scopes = Get-DhcpServerv4Scope -ComputerName "$LocalDC" -ErrorAction SilentlyContinue
         if ($Scopes) {
             Write-Host "Setting up Failover partnership ($failoverName) for scope(s): $($Scopes.ScopeId)..."
-            # -ServerRole is omitted to default to LoadBalance mode
             Add-DhcpServerv4Failover -ComputerName "$LocalDC" `
                                      -Name "$failoverName" `
-                                     -PartnerDownDelayTime 00:01:00 `
                                      -PartnerServer "$PartnerDC" `
                                      -ScopeId $Scopes.ScopeId `
                                      -SharedSecret "Secret123!" `
