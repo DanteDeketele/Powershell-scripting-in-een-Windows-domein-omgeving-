@@ -1,0 +1,94 @@
+PS C:\Users\Administrator\Documents> .\remove-script.ps1
+===================================================
+ PHASE 0: DISCOVERING PARTNER SERVER
+===================================================
+Local Domain Controller detected as: WIN00-DC1
+Auto-detected Partner DC for cleanup: WIN00-DC2
+
+===================================================
+ ACTIONS TO BE PERFORMED
+===================================================
+To provide a clean slate for the assignment, this script will:
+ 1. Remove all DHCP Failover relationships from WIN00-DC1.
+ 2. Force remove any replicated DHCP Scopes from WIN00-DC2.
+ 3. Unauthorize WIN00-DC2 from Active Directory.
+ 4. Uninstall the DHCP Server Role and Management Tools from WIN00-DC2.
+ 5. Reset the Server Manager post-deployment warning on WIN00-DC2.
+
+===================================================
+ CONFIRMATION
+===================================================
+Do you want to proceed with this cleanup? (Y/N): y
+
+===================================================
+ EXECUTING CLEANUP
+===================================================
+1. Removing DHCP Failover relationships on WIN00-DC1...
+   [OK] Failovers removed.
+2. Removing DHCP Scopes on WIN00-DC2...
+   [-] No scopes found on WIN00-DC2.
+3. Unauthorizing WIN00-DC2 from Active Directory...
+   [OK] Server unauthorized.
+4. Uninstalling DHCP Role and Management Tools on WIN00-DC2...
+WARNING: You must restart this server to finish the removal process.
+   [OK] DHCP Role and tools uninstalled.
+
+Cleanup completed! Everything should now be ready for a fresh execution of script 1.
+PS C:\Users\Administrator\Documents> .\script1.ps1
+===================================================
+ PHASE 0: DISCOVERING PARTNER SERVER
+===================================================
+Local Domain Controller detected as: WIN00-DC1
+Auto-detected a second Domain Controller in AD: WIN00-DC2
+Checking DNS resolution for 'WIN00-DC2'...
+[OK] DNS resolved successfully. IP of WIN00-DC2 is 192.168.1.3
+
+===================================================
+ PHASE 1: TESTING CURRENT CONFIGURATION
+===================================================
+[!] DHCP Server Role is missing on WIN00-DC2 and will be installed.
+[OK] WIN00-DC2 is already authorized in Active Directory.
+[!] Failover partnership is missing and will be created.
+
+===================================================
+ CONFIRMATION
+===================================================
+Do you want to apply the required changes (Phase 2) now? (Y/N): y
+
+===================================================
+ PHASE 2: APPLYING MISSING CONFIGURATION
+===================================================
+Installing DHCP Role including Management Tools on WIN00-DC2...
+WARNING: You must restart this server to finish the installation process.
+Setting up Failover partnership (WIN00-DC1-WIN00-DC2-Failover) for scope(s): 192.168.1.0...
+Configuring DNS server options on WIN00-DC2 (Order: 192.168.1.3, 192.168.1.2)...
+
+Script successfully completed!
+PS C:\Users\Administrator\Documents> .\script1.ps1
+===================================================
+ PHASE 0: DISCOVERING PARTNER SERVER
+===================================================
+Local Domain Controller detected as: WIN00-DC1
+Auto-detected a second Domain Controller in AD: WIN00-DC2
+Checking DNS resolution for 'WIN00-DC2'...
+[OK] DNS resolved successfully. IP of WIN00-DC2 is 192.168.1.3
+
+===================================================
+ PHASE 1: TESTING CURRENT CONFIGURATION
+===================================================
+[OK] DHCP Server Role is already installed on WIN00-DC2.
+[OK] WIN00-DC2 is already authorized in Active Directory.
+[OK] Failover partnership 'WIN00-DC1-WIN00-DC2-Failover' already exists.
+
+===================================================
+ CONFIRMATION
+===================================================
+Do you want to apply the required changes (Phase 2) now? (Y/N): y
+
+===================================================
+ PHASE 2: APPLYING MISSING CONFIGURATION
+===================================================
+Configuring DNS server options on WIN00-DC2 (Order: 192.168.1.3, 192.168.1.2)...
+
+Script successfully completed!
+PS C:\Users\Administrator\Documents>
