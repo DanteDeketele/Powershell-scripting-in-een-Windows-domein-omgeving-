@@ -1,13 +1,52 @@
-param (
-    [string]$PartnerDC = "MCT-DC2"
-)
-
 $LocalDC =$env:COMPUTERNAME
 $Domain =$env:USERDNSDOMAIN
 
-# Variabelen in dubbele aanhalingstekens om copy-paste fouten (ontbrekende spaties) te voorkomen
-$PartnerIP = (Resolve-DnsName -Name "$PartnerDC" -Type A -ErrorAction Stop).IPAddress | Select-Object -First 1
-$LocalIP = (Resolve-DnsName -Name "$LocalDC" -Type A -ErrorAction Stop).IPAddress | Select-Object -First 1
+Write-Host "==================================================="
+Write-Host " PHASE 0: DISCOVERING PARTNER SERVER"
+Write-Host "==================================================="
+Write-Host "Local Domain Controller detected as: $LocalDC" -ForegroundColor Cyan
+
+# Try to auto-detect the other Domain Controller in the domain
+$AutoPartner = ""
+try {
+    $allDCs = Get-ADDomainController -Filter * | Select-Object -ExpandProperty Name
+    # The @() forces it to be an array, preventing the string indexing bug
+    $otherDCs = @($allDCs | Where-Object { $_ -ne$LocalDC })
+    
+    if ($otherDCs.Count -eq 1) {
+        $AutoPartner =$otherDCs[0]
+        Write-Host "Auto-detected a second Domain Controller in AD: $AutoPartner" -ForegroundColor Green
+    }
+} catch {
+    Write-Warning "Could not query Active Directory for other Domain Controllers."
+}
+
+# Loop to ensure we get a valid Partner DC with working DNS
+$validDNS =$false
+$PartnerDC =$AutoPartner
+
+while (-not $validDNS) {
+    if ([string]::IsNullOrWhiteSpace($PartnerDC)) {$PartnerDC = Read-Host "Please enter the exact hostname of the Partner DC (e.g., win00-DC2)"
+    }
+
+    if ([string]::IsNullOrWhiteSpace($PartnerDC)) {
+        Write-Warning "Name cannot be empty. Try again."
+        $PartnerDC = ""
+        continue
+    }
+
+    Write-Host "Checking DNS resolution for '$PartnerDC'..."
+    try {
+        $PartnerIP = (Resolve-DnsName -Name "$PartnerDC" -Type A -ErrorAction Stop).IPAddress | Select-Object -First 1
+        $LocalIP = (Resolve-DnsName -Name "$LocalDC" -Type A -ErrorAction Stop).IPAddress | Select-Object -First 1
+        $validDNS =$true
+        Write-Host "[OK] DNS resolved successfully. IP of $PartnerDC is$PartnerIP`n" -ForegroundColor Green
+    } catch {
+        Write-Warning "[!] Cannot find '$PartnerDC' in DNS. Please check the name or ensure the server is turned on and connected."
+        $PartnerDC = "" # Clear the variable to force the prompt in the next loop iteration
+    }
+}
+
 
 Write-Host "==================================================="
 Write-Host " PHASE 1: TESTING CURRENT CONFIGURATION"
@@ -44,6 +83,7 @@ if ($existingFailover) {
     $NeedsFailover =$true
 }
 
+
 # --- REQUEST CONFIRMATION ---
 Write-Host "`n==================================================="
 Write-Host " CONFIRMATION"
@@ -54,6 +94,7 @@ if ($confirmation -notmatch "^[yY]") {
     Write-Warning "Execution cancelled. No changes have been made."
     exit
 }
+
 
 Write-Host "`n==================================================="
 Write-Host " PHASE 2: APPLYING MISSING CONFIGURATION"
