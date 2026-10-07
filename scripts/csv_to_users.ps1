@@ -2,7 +2,10 @@ param (
     [switch]$y
 )
 
-$ErrorActionPreference = 'Stop'$Domain = $env:USERDNSDOMAIN$LocalDC = $env:COMPUTERNAME$DomainDN = (Get-ADDomain).DistinguishedName # Zoekt automatisch jouw DC=...,DC=... op!
+$ErrorActionPreference = 'Stop'
+$Domain = $env:USERDNSDOMAIN
+$LocalDC = $env:COMPUTERNAME
+$DomainDN = (Get-ADDomain).DistinguishedName
 
 # --- Configuratie Variabelen ---
 $MemberServer = "WIN00-MS"
@@ -72,7 +75,8 @@ try {
         }
 
         $acl = Get-Acl "$Path"
-        $acl.SetAccessRuleProtection($true, $false)$adminRule = New-Object System.Security.AccessControl.FileSystemAccessRule("Administrators", "FullControl", "ContainerInherit, ObjectInherit", "None", "Allow")
+        $acl.SetAccessRuleProtection($true, $false)
+        $adminRule = New-Object System.Security.AccessControl.FileSystemAccessRule("Administrators", "FullControl", "ContainerInherit, ObjectInherit", "None", "Allow")
         $authUserRule = New-Object System.Security.AccessControl.FileSystemAccessRule("Authenticated Users", "ReadAndExecute", "None", "None", "Allow")
         $acl.AddAccessRule($adminRule)
         $acl.AddAccessRule($authUserRule)
@@ -116,6 +120,18 @@ foreach ($user in $Users) {
 
     # 3. Create User
     try {
+        $userHomeLocalPath = Join-Path $ShareLocalPath $user.SamAccountName
+        Invoke-Command -ComputerName $MemberServer -ArgumentList $userHomeLocalPath -ScriptBlock {
+            param($Path)
+
+            if (-not (Test-Path -Path $Path)) {
+                New-Item -Path $Path -ItemType Directory -Force | Out-Null
+                Write-Host "   [OK] Created home directory $Path on remote server." -ForegroundColor Green
+            } else {
+                Write-Host "   [i] Home directory $Path already exists." -ForegroundColor Gray
+            }
+        }
+
         $userExists = Get-ADUser -Filter "SamAccountName -eq '$($user.SamAccountName)'"
         if (-not $userExists) {
             $upn = "$($user.SamAccountName)@$Domain"
