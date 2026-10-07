@@ -1,0 +1,4 @@
+ClientName;IPAddress;MacAddress;ScopeId;Description
+Printer-HR;192.168.1.50;00-11-22-33-44-55;192.168.1.0;HR Afdeling Printer
+Server-Web;192.168.1.51;AA-BB-CC-DD-EE-FF;192.168.1.0;Interne Webserver
+MCT-WIN;192.168.1.52;00-15-5D-11-22-33;192.168.1.0;Windows 11 Client Reservatie

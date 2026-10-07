@@ -1,0 +1,4 @@
+FirstName;LastName;SamAccountName;OU;Group
+Jan;Jansen;jjansen;IT;IT_Users
+Piet;Pieters;ppieters;HR;HR_Users
+Marie;Klaassen;mklaassen;Sales;Sales_Users

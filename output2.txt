@@ -1,0 +1,24 @@
+PS C:\Users\Administrator\Documents> .\script1.ps1
+===================================================
+ PHASE 1: READING EXCEL/CSV DATA
+===================================================
+[OK] Successfully loaded 3 reservations from the file.
+
+===================================================
+ PHASE 2: CREATING DHCP RESERVATIONS
+===================================================
+Processing reservation for 'Printer-HR' with IP 192.168.1.50...
+WARNING:   -> [!] Failed to add reservation. It might already exist or the parameters are invalid.
+Processing reservation for 'Server-Web' with IP 192.168.1.51...
+  -> [OK] Successfully added reservation.
+Processing reservation for 'MCT-WIN' with IP 192.168.1.52...
+  -> [OK] Successfully added reservation.
+
+===================================================
+ PHASE 3: REPLICATING TO PARTNER SERVER
+===================================================
+Triggering failover replication for all scopes...
+192.168.1.0
+[OK] Replication triggered successfully! DC2 is now up to date.
+
+Script successfully completed!
