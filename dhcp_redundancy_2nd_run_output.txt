@@ -1,0 +1,48 @@
+PS C:\Users\Administrator\Documents> .\dhcp_redundancy.ps1
+===================================================
+ PHASE 0: DISCOVERING PARTNER SERVER
+===================================================
+Local Domain Controller detected as: WIN00-DC1
+Auto-detected a second Domain Controller in AD: WIN00-DC2
+Checking DNS resolution for 'WIN00-DC2'...
+[OK] DNS resolved successfully. IP of WIN00-DC2 is 192.168.1.3
+
+===================================================
+ PHASE 1: TESTING CURRENT CONFIGURATION
+===================================================
+[!] Missing on WIN00-DC2 and will be installed: DHCP, RSAT-DHCP.
+[!] WIN00-DC2 is not yet authorized in Active Directory.
+[!] Server Manager post-deployment configuration is not complete on WIN00-DC2.
+[!] Failover partnership is missing and will be created.
+
+===================================================
+ CONFIRMATION
+===================================================
+Do you want to apply the required changes (Phase 2) now? (Y/N): y
+
+===================================================
+ PHASE 2: APPLYING MISSING CONFIGURATION
+===================================================
+Installing DHCP Role including Management Tools on WIN00-DC2...
+WARNING: You must restart this server to finish the installation process.
+Authorizing DHCP server in AD...
+Completing post-install configuration on WIN00-DC2...
+WARNING: Waiting for service 'DHCP Server (DHCPServer)' to start...
+WARNING: Waiting for service 'DHCP Server (DHCPServer)' to start...
+Setting up Failover partnership (WIN00-DC1-WIN00-DC2-Failover) for scope(s): 192.168.1.0...
+Copying DHCP server options from WIN00-DC1 to WIN00-DC2...
+   [OK] Option 15 (DNS Domain Name): hq.company.com
+Configuring DNS server options on WIN00-DC2 (Order: 192.168.1.3, 192.168.1.2)...
+
+===================================================
+ PHASE 3: VERIFYING RESULT
+===================================================
+Feature DHCP installed: True
+Feature RSAT-DHCP installed: True
+Authorized in AD: win00-dc2.hq.company.com
+Server Manager ConfigurationState on WIN00-DC2: 2 (2 = complete)
+Failover: WIN00-DC1-WIN00-DC2-Failover | Partner: WIN00-DC2 | Mode: LoadBalance | State: Normal | Scopes: 192.168.1.0
+DNS servers (server option) on WIN00-DC1: 192.168.1.2, 192.168.1.3
+DNS servers (server option) on WIN00-DC2: 192.168.1.3, 192.168.1.2
+
+Script successfully completed!
