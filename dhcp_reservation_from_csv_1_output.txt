@@ -1,0 +1,32 @@
+PS C:\Users\Administrator\Documents> .\dhcp_reservations_from_csv.ps1
+===================================================
+ PHASE 1: READING EXCEL/CSV DATA
+===================================================
+[OK] Successfully loaded 4 reservations from the file.
+
+===================================================
+ PHASE 2: CREATING DHCP RESERVATIONS
+===================================================
+Processing reservation for 'Printer-HR' with IP 192.168.1.50...
+WARNING:   -> [!] Conflict with 'printer1.hq.company.com' (192.168.1.200, 00-11-22-33-44-55).
+Processing reservation for 'Server-Web' with IP 192.168.1.51...
+  -> [i] Reservation already exists.
+Processing reservation for 'MCT-WIN' with IP 192.168.1.52...
+  -> [i] Reservation already exists.
+Processing reservation for 'Test-Replicatie' with IP 192.168.1.53...
+  -> [OK] Successfully added reservation.
+
+===================================================
+ PHASE 3: REPLICATING TO PARTNER SERVER
+===================================================
+Triggering failover replication for all scopes...
+[OK] Replication triggered for scope(s): 192.168.1.0
+
+===================================================
+ PHASE 4: VERIFYING RESERVATIONS ON PARTNER SERVER
+===================================================
+WARNING: [!] Printer-HR (192.168.1.50) NOT found on WIN00-DC2.
+[OK] Server-Web (192.168.1.51) found on WIN00-DC2.
+[OK] MCT-WIN (192.168.1.52) found on WIN00-DC2.
+[OK] Test-Replicatie (192.168.1.53) found on WIN00-DC2.
+WARNING: Script completed with 2 problem(s). Check the messages above.
