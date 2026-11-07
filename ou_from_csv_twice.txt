@@ -1,0 +1,150 @@
+PS C:\Users\Administrator\Documents> .\ou_csv.ps1
+===================================================
+ PHASE 1: READING EXCEL/CSV DATA
+===================================================
+[OK] Loaded 18 OUs from CSV.
+
+===================================================
+ ACTIONS TO BE PERFORMED
+===================================================
+ 1. Create the company OU 'Bedrijf' if it is missing.
+ 2. Create the missing OUs from the CSV under 'Bedrijf'.
+
+===================================================
+ CONFIRMATION
+===================================================
+Do you want to apply these changes now? (Y/N): y
+
+===================================================
+ PHASE 2: CREATING OU STRUCTURE
+===================================================
+[i] Company OU 'Bedrijf' already exists.
+[OK] Created OU=Directie,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[i] OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[OK] Created OU=Boekhouding,OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[i] OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[OK] Created OU=Aankoop,OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[i] OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[OK] Created OU=Rekrutering,OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[i] OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[OK] Created OU=Payroll,OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[i] OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[OK] Created OU=Helpdesk,OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[i] OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[OK] Created OU=Infrastructuur,OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[i] OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[OK] Created OU=Ontwikkeling,OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[i] OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[OK] Created OU=Binnendienst,OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[i] OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[OK] Created OU=Buitendienst,OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[OK] Created OU=Marketing,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[OK] Created OU=Operations,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[i] OU=Operations,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[OK] Created OU=Productie,OU=Operations,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[i] OU=Operations,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[OK] Created OU=Logistiek,OU=Operations,OU=Bedrijf,DC=HQ,DC=company,DC=com
+
+===================================================
+ PHASE 3: VERIFYING RESULT
+===================================================
+Bedrijf (0 users)
+   Directie (0 users)
+   Finance (1 users)
+      Aankoop (0 users)
+      Boekhouding (0 users)
+   HR (1 users)
+      Payroll (0 users)
+      Rekrutering (0 users)
+   IT (1 users)
+      Helpdesk (0 users)
+      Infrastructuur (0 users)
+      Ontwikkeling (0 users)
+   Marketing (0 users)
+   Operations (0 users)
+      Logistiek (0 users)
+      Productie (0 users)
+   Sales (1 users)
+      Binnendienst (0 users)
+      Buitendienst (0 users)
+
+Script successfully completed!
+PS C:\Users\Administrator\Documents> .\ou_csv.ps1
+===================================================
+ PHASE 1: READING EXCEL/CSV DATA
+===================================================
+[OK] Loaded 18 OUs from CSV.
+
+===================================================
+ ACTIONS TO BE PERFORMED
+===================================================
+ 1. Create the company OU 'Bedrijf' if it is missing.
+ 2. Create the missing OUs from the CSV under 'Bedrijf'.
+
+===================================================
+ CONFIRMATION
+===================================================
+Do you want to apply these changes now? (Y/N): y
+
+===================================================
+ PHASE 2: CREATING OU STRUCTURE
+===================================================
+[i] Company OU 'Bedrijf' already exists.
+[i] OU=Directie,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Boekhouding,OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Aankoop,OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Rekrutering,OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Payroll,OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Helpdesk,OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Infrastructuur,OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Ontwikkeling,OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Binnendienst,OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Buitendienst,OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Marketing,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Operations,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Operations,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Productie,OU=Operations,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Operations,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+[i] OU=Logistiek,OU=Operations,OU=Bedrijf,DC=HQ,DC=company,DC=com already exists.
+
+===================================================
+ PHASE 3: VERIFYING RESULT
+===================================================
+Bedrijf (0 users)
+   Directie (0 users)
+   Finance (1 users)
+      Aankoop (0 users)
+      Boekhouding (0 users)
+   HR (1 users)
+      Payroll (0 users)
+      Rekrutering (0 users)
+   IT (1 users)
+      Helpdesk (0 users)
+      Infrastructuur (0 users)
+      Ontwikkeling (0 users)
+   Marketing (0 users)
+   Operations (0 users)
+      Logistiek (0 users)
+      Productie (0 users)
+   Sales (1 users)
+      Binnendienst (0 users)
+      Buitendienst (0 users)
+
+Script successfully completed!

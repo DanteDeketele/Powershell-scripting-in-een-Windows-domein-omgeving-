@@ -1,0 +1,19 @@
+Path;Description
+Directie;Algemene directie
+Finance;Financiele dienst
+Finance/Boekhouding;Boekhouding
+Finance/Aankoop;Aankoopdienst
+HR;Personeelsdienst
+HR/Rekrutering;Rekrutering en selectie
+HR/Payroll;Loonadministratie
+IT;IT-dienst
+IT/Helpdesk;Gebruikersondersteuning
+IT/Infrastructuur;Servers en netwerk
+IT/Ontwikkeling;Softwareontwikkeling
+Sales;Verkoopdienst
+Sales/Binnendienst;Verkoop binnendienst
+Sales/Buitendienst;Verkoop buitendienst
+Marketing;Marketing en communicatie
+Operations;Productie en logistiek
+Operations/Productie;Productie
+Operations/Logistiek;Logistiek
