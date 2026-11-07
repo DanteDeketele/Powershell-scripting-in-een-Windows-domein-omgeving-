@@ -1,0 +1,36 @@
+PS C:\Users\Administrator\Documents> .\remove_dhcp.ps1
+===================================================
+ PHASE 0: DISCOVERING PARTNER SERVER
+===================================================
+Local Domain Controller detected as: WIN00-DC1
+Auto-detected Partner DC for cleanup: WIN00-DC2
+
+===================================================
+ ACTIONS TO BE PERFORMED
+===================================================
+To provide a clean slate for the assignment, this script will:
+ 1. Remove all DHCP Failover relationships from WIN00-DC1.
+ 2. Force remove any replicated DHCP Scopes from WIN00-DC2.
+ 3. Unauthorize WIN00-DC2 from Active Directory.
+ 4. Uninstall the DHCP Server Role and Management Tools from WIN00-DC2.
+ 5. Reset the Server Manager post-deployment warning on WIN00-DC2.
+
+===================================================
+ CONFIRMATION
+===================================================
+Do you want to proceed with this cleanup? (Y/N): y
+
+===================================================
+ EXECUTING CLEANUP
+===================================================
+1. Removing DHCP Failover relationships on WIN00-DC1...
+   [OK] Failovers removed.
+2. Removing DHCP Scopes on WIN00-DC2...
+   [-] No scopes found on WIN00-DC2.
+3. Unauthorizing WIN00-DC2 from Active Directory...
+   [OK] Server unauthorized.
+4. Uninstalling DHCP Role and Management Tools on WIN00-DC2...
+WARNING: You must restart this server to finish the removal process.
+   [OK] DHCP Role and tools uninstalled.
+
+Cleanup completed! Restart WIN00-DC2 before a fresh execution of script 1.
