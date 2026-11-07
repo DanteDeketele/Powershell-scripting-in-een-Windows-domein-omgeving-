@@ -1,5 +1,4 @@
-$LocalDC =$env:COMPUTERNAME
-$Domain =$env:USERDNSDOMAIN
+$LocalDC = $env:COMPUTERNAME
 
 Write-Host "==================================================="
 Write-Host " PHASE 0: DISCOVERING PARTNER SERVER"
@@ -10,10 +9,10 @@ Write-Host "Local Domain Controller detected as: $LocalDC" -ForegroundColor Cyan
 $PartnerDC = ""
 try {
     $allDCs = Get-ADDomainController -Filter * | Select-Object -ExpandProperty Name
-    $otherDCs = @($allDCs | Where-Object { $_ -ne$LocalDC })
+    $otherDCs = @($allDCs | Where-Object { $_ -ne $LocalDC })
     
     if ($otherDCs.Count -eq 1) {
-        $PartnerDC =$otherDCs[0]
+        $PartnerDC = $otherDCs[0]
         Write-Host "Auto-detected Partner DC for cleanup: $PartnerDC" -ForegroundColor Green
     } else {
         Write-Warning "Could not automatically determine a single Partner DC. Found $($otherDCs.Count) other DCs."
@@ -23,10 +22,6 @@ try {
     Write-Warning "Could not query Active Directory for other Domain Controllers."
     exit
 }
-
-# Resolve IP and FQDN
-$PartnerIP = (Resolve-DnsName -Name "$PartnerDC" -Type A -ErrorAction SilentlyContinue).IPAddress | Select-Object -First 1
-$fqdn = "$PartnerDC.$Domain"
 
 Write-Host "`n==================================================="
 Write-Host " ACTIONS TO BE PERFORMED"
@@ -78,10 +73,23 @@ try {
 
 # 3. Unauthorize DC2 in Active Directory
 Write-Host "3. Unauthorizing $PartnerDC from Active Directory..."
-$authorizedServers = Get-DhcpServerInDC -ErrorAction SilentlyContinue
-if ($authorizedServers.DnsName -match $PartnerDC) {
-    Remove-DhcpServerInDC -DnsName "$fqdn" -IPAddress "$PartnerIP" -ErrorAction SilentlyContinue
-    Write-Host "   [OK] Server unauthorized." -ForegroundColor Green
+$authorizedEntries = @(Get-DhcpServerInDC -ErrorAction SilentlyContinue | Where-Object { $_.DnsName -match $PartnerDC })
+if ($authorizedEntries.Count -gt 0) {
+    try {
+        # Use the values stored in AD, they must match exactly for the removal to work
+        foreach ($entry in $authorizedEntries) {
+            Remove-DhcpServerInDC -DnsName "$($entry.DnsName)" -IPAddress "$($entry.IPAddress)" -ErrorAction Stop
+        }
+
+        $stillAuthorized = @(Get-DhcpServerInDC | Where-Object { $_.DnsName -match $PartnerDC })
+        if ($stillAuthorized.Count -eq 0) {
+            Write-Host "   [OK] Server unauthorized." -ForegroundColor Green
+        } else {
+            Write-Warning "   [!] $PartnerDC is still listed as authorized in AD."
+        }
+    } catch {
+        Write-Warning "   [!] Failed to unauthorize $PartnerDC. Error: $_"
+    }
 } else {
     Write-Host "   [-] Server was not authorized in AD." -ForegroundColor Gray
 }
@@ -104,4 +112,4 @@ try {
     Write-Warning "   [!] Failed to uninstall roles. Ensure $PartnerDC is online."
 }
 
-Write-Host "`nCleanup completed! Everything should now be ready for a fresh execution of script 1." -ForegroundColor Cyan
+Write-Host "`nCleanup completed! Restart $PartnerDC before a fresh execution of script 1." -ForegroundColor Cyan
