@@ -1,0 +1,117 @@
+PS C:\Users\Administrator\Documents> .\upn.ps1
+===================================================
+ ADDING UPN SUFFIX AND UPDATING BUSINESS USERS
+===================================================
+Domain: HQ.COMPANY.COM
+New UPN suffix: bedrijf.local
+Business OU: Bedrijf
+Users in business OU: 4
+OUs in business OU: 5
+Add the suffix and update these users? (Y/N): y
+[OK] Added UPN suffix 'bedrijf.local' to the forest.
+[OK] Set default suffix on OU=Bedrijf,DC=HQ,DC=company,DC=com
+[OK] Set default suffix on OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[OK] Set default suffix on OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[OK] Set default suffix on OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[OK] Set default suffix on OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[OK] Updated jjansen to jjansen@bedrijf.local
+[OK] Updated ppieters to ppieters@bedrijf.local
+[OK] Updated mklaassen to mklaassen@bedrijf.local
+[OK] Updated tgebruiker to tgebruiker@bedrijf.local
+
+===================================================
+ VERIFYING RESULT
+===================================================
+Forest UPN suffixes: bedrijf.local, company.com
+
+Users inside OU 'Bedrijf':
+   [OK] jjansen: jjansen@bedrijf.local
+   [OK] ppieters: ppieters@bedrijf.local
+   [OK] mklaassen: mklaassen@bedrijf.local
+   [OK] tgebruiker: tgebruiker@bedrijf.local
+
+Users outside OU 'Bedrijf' (must keep their old UPN):
+   [OK] Administrator:
+   [OK] Guest:
+   [OK] krbtgt:
+   [OK] SmithJ: John.Smith@company.com
+   [OK] JonesS: Susan.Jones@company.com
+   [OK] ParkerR: Rachel.Parker@company.com
+   [OK] AllenT: Tom.Allen@company.com
+   [OK] JudithK: Judith.Kelvin@company.com
+   [OK] JohnsonA: Alice.Johnson@company.com
+   [OK] MooreT: Tim.Moore@company.com
+   [OK] GrossM: Michael.Gross@company.com
+   [OK] DoleK: Kim.Dole@company.com
+   [OK] RobertsK: Kathy.Roberts@company.com
+   [OK] FosterB: Betsy.Foster@company.com
+   [OK] LuciferM: Michele.Lucifer@company.com
+   [OK] SotoB: Brendon.Soto@company.com
+
+Default suffix per OU:
+   OU=Bedrijf,DC=HQ,DC=company,DC=com: bedrijf.local
+   OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com: bedrijf.local
+   OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com: bedrijf.local
+   OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com: bedrijf.local
+   OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com: bedrijf.local
+
+UPN suffix configuration completed.
+PS C:\Users\Administrator\Documents> .\upn.ps1
+===================================================
+ ADDING UPN SUFFIX AND UPDATING BUSINESS USERS
+===================================================
+Domain: HQ.COMPANY.COM
+New UPN suffix: bedrijf.local
+Business OU: Bedrijf
+Users in business OU: 4
+OUs in business OU: 5
+Add the suffix and update these users? (Y/N): y
+[i] UPN suffix 'bedrijf.local' already exists.
+[OK] Set default suffix on OU=Bedrijf,DC=HQ,DC=company,DC=com
+[OK] Set default suffix on OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[OK] Set default suffix on OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[OK] Set default suffix on OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[OK] Set default suffix on OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com
+[i] jjansen already uses jjansen@bedrijf.local
+[i] ppieters already uses ppieters@bedrijf.local
+[i] mklaassen already uses mklaassen@bedrijf.local
+[i] tgebruiker already uses tgebruiker@bedrijf.local
+
+===================================================
+ VERIFYING RESULT
+===================================================
+Forest UPN suffixes: bedrijf.local, company.com
+
+Users inside OU 'Bedrijf':
+   [OK] jjansen: jjansen@bedrijf.local
+   [OK] ppieters: ppieters@bedrijf.local
+   [OK] mklaassen: mklaassen@bedrijf.local
+   [OK] tgebruiker: tgebruiker@bedrijf.local
+
+Users outside OU 'Bedrijf' (must keep their old UPN):
+   [OK] Administrator:
+   [OK] Guest:
+   [OK] krbtgt:
+   [OK] SmithJ: John.Smith@company.com
+   [OK] JonesS: Susan.Jones@company.com
+   [OK] ParkerR: Rachel.Parker@company.com
+   [OK] AllenT: Tom.Allen@company.com
+   [OK] JudithK: Judith.Kelvin@company.com
+   [OK] JohnsonA: Alice.Johnson@company.com
+   [OK] MooreT: Tim.Moore@company.com
+   [OK] GrossM: Michael.Gross@company.com
+   [OK] DoleK: Kim.Dole@company.com
+   [OK] RobertsK: Kathy.Roberts@company.com
+   [OK] FosterB: Betsy.Foster@company.com
+   [OK] LuciferM: Michele.Lucifer@company.com
+   [OK] SotoB: Brendon.Soto@company.com
+
+Default suffix per OU:
+   OU=Bedrijf,DC=HQ,DC=company,DC=com: bedrijf.local
+   OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com: bedrijf.local
+   OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com: bedrijf.local
+   OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com: bedrijf.local
+   OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com: bedrijf.local
+
+UPN suffix configuration completed.
+PS C:\Users\Administrator\Documents>

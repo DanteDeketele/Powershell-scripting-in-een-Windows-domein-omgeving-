@@ -179,3 +179,109 @@ NTFS permissions on C:\HomeShares\ppieters:
    BUILTIN\Administrators: FullControl | Inherited: True | Applies to subfolders/files: ContainerInherit, ObjectInherit
 
 Script successfully completed!
+
+
+
+PS C:\Users\Administrator\Documents> .\csv_to_users.ps1
+===================================================
+ PHASE 1: PREPARATION & READING CSV
+===================================================
+[OK] Loaded 4 users from CSV.
+
+===================================================
+ ACTIONS TO BE PERFORMED
+===================================================
+ 1. Connect to WIN00-MS and configure the 'Home' share.
+ 2. Set strict NTFS permissions.
+ 3. Automatically create missing OUs and Groups under OU 'Bedrijf'.
+ 4. Create or update 4 users in Active Directory.
+ 5. Create a home folder for each user and give the user access to it.
+
+===================================================
+ CONFIRMATION
+===================================================
+Do you want to apply these changes now? (Y/N): y
+
+===================================================
+ PHASE 2: CONFIGURING HOME SHARE ON MEMBER SERVER
+===================================================
+   [i] Directory C:\HomeShares already exists.
+   [i] Share 'Home' already exists. Verified Everyone - Full Control.
+   [OK] Verified strict NTFS permissions.
+
+===================================================
+ PHASE 3: CREATING OUS, GROUPS AND USERS IN AD
+===================================================
+[i] Company OU 'Bedrijf' already exists.
+Processing user: Jan Jansen (jjansen)...
+   [i] User already exists in AD.
+   [i] User is already a member of group 'IT_Users'.
+   [i] Home directory C:\HomeShares\jjansen already exists.
+   [OK] Gave the user Full Control on C:\HomeShares\jjansen.
+Processing user: Piet Pieters (ppieters)...
+   [i] User already exists in AD.
+   [i] User is already a member of group 'HR_Users'.
+   [i] Home directory C:\HomeShares\ppieters already exists.
+   [OK] Gave the user Full Control on C:\HomeShares\ppieters.
+Processing user: Marie Klaassen (mklaassen)...
+   [i] User already exists in AD.
+   [i] User is already a member of group 'Sales_Users'.
+   [i] Home directory C:\HomeShares\mklaassen already exists.
+   [OK] Gave the user Full Control on C:\HomeShares\mklaassen.
+Processing user: Test Gebruiker (tgebruiker)...
+   -> OU 'Finance' not found. Creating it automatically...
+   -> Group 'Finance_Users' not found. Creating it...
+   [OK] User created successfully in OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com.
+   [OK] User added to group 'Finance_Users'.
+   [OK] Created home directory C:\HomeShares\tgebruiker on remote server.
+   [OK] Gave the user Full Control on C:\HomeShares\tgebruiker.
+
+===================================================
+ PHASE 4: VERIFYING RESULT
+===================================================
+jjansen
+   DN:     CN=Jan Jansen,OU=IT,OU=Bedrijf,DC=HQ,DC=company,DC=com
+   UPN:    jjansen@HQ.COMPANY.COM
+   Home:   H: \\WIN00-MS\Home\jjansen
+   Groups: Domain Users, IT_Users
+ppieters
+   DN:     CN=Piet Pieters,OU=HR,OU=Bedrijf,DC=HQ,DC=company,DC=com
+   UPN:    ppieters@HQ.COMPANY.COM
+   Home:   H: \\WIN00-MS\Home\ppieters
+   Groups: Domain Users, HR_Users
+mklaassen
+   DN:     CN=Marie Klaassen,OU=Sales,OU=Bedrijf,DC=HQ,DC=company,DC=com
+   UPN:    mklaassen@HQ.COMPANY.COM
+   Home:   H: \\WIN00-MS\Home\mklaassen
+   Groups: Domain Users, Sales_Users
+tgebruiker
+   DN:     CN=Test Gebruiker,OU=Finance,OU=Bedrijf,DC=HQ,DC=company,DC=com
+   UPN:    tgebruiker@HQ.company.com
+   Home:   H: \\WIN00-MS\Home\tgebruiker
+   Groups: Domain Users, Finance_Users
+
+Share permissions on \\WIN00-MS\Home:
+   Everyone: Allow Full
+
+NTFS permissions on C:\HomeShares:
+   NT AUTHORITY\Authenticated Users: Read, Synchronize | Inherited: False | Applies to subfolders/files: None
+   BUILTIN\Administrators: FullControl | Inherited: False | Applies to subfolders/files: ContainerInherit, ObjectInherit
+
+NTFS permissions on C:\HomeShares\jjansen:
+   HQ\jjansen: FullControl | Inherited: False | Applies to subfolders/files: ContainerInherit, ObjectInherit
+   BUILTIN\Administrators: FullControl | Inherited: True | Applies to subfolders/files: ContainerInherit, ObjectInherit
+
+NTFS permissions on C:\HomeShares\mklaassen:
+   HQ\mklaassen: FullControl | Inherited: False | Applies to subfolders/files: ContainerInherit, ObjectInherit
+   BUILTIN\Administrators: FullControl | Inherited: True | Applies to subfolders/files: ContainerInherit, ObjectInherit
+
+NTFS permissions on C:\HomeShares\ppieters:
+   HQ\ppieters: FullControl | Inherited: False | Applies to subfolders/files: ContainerInherit, ObjectInherit
+   BUILTIN\Administrators: FullControl | Inherited: True | Applies to subfolders/files: ContainerInherit, ObjectInherit
+
+NTFS permissions on C:\HomeShares\tgebruiker:
+   HQ\tgebruiker: FullControl | Inherited: False | Applies to subfolders/files: ContainerInherit, ObjectInherit
+   BUILTIN\Administrators: FullControl | Inherited: True | Applies to subfolders/files: ContainerInherit, ObjectInherit
+
+Script successfully completed!
+PS C:\Users\Administrator\Documents>
