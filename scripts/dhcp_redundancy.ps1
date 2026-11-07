@@ -2,6 +2,7 @@ $ErrorActionPreference = 'Stop'
 
 $LocalDC = $env:COMPUTERNAME
 $Domain = $env:USERDNSDOMAIN
+$ServerManagerKey = "registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\ServerManager\Roles\12"
 
 Write-Host "==================================================="
 Write-Host " PHASE 0: DISCOVERING PARTNER SERVER"
@@ -54,15 +55,16 @@ Write-Host "==================================================="
 Write-Host " PHASE 1: TESTING CURRENT CONFIGURATION"
 Write-Host "==================================================="
 
-# 1. Test if DHCP role is installed on DC2
+# 1. Test if DHCP role and management tools are installed on DC2
 try {
-    $dhcpRole = Invoke-Command -ComputerName "$PartnerDC" -ScriptBlock { Get-WindowsFeature -Name DHCP }
-    if ($dhcpRole.Installed) {
-        Write-Host "[OK] DHCP Server Role is already installed on $PartnerDC." -ForegroundColor Green
-        $NeedsInstall =$false
+    $dhcpFeatures = Invoke-Command -ComputerName "$PartnerDC" -ScriptBlock { Get-WindowsFeature -Name DHCP, RSAT-DHCP }
+    $missingFeatures = @($dhcpFeatures | Where-Object { -not $_.Installed })
+    if ($missingFeatures.Count -eq 0) {
+        Write-Host "[OK] DHCP Server Role and management tools are already installed on $PartnerDC." -ForegroundColor Green
+        $NeedsInstall = $false
     } else {
-        Write-Host "[!] DHCP Server Role is missing on $PartnerDC and will be installed." -ForegroundColor Yellow
-        $NeedsInstall =$true
+        Write-Host "[!] Missing on $PartnerDC and will be installed: $($missingFeatures.Name -join ', ')." -ForegroundColor Yellow
+        $NeedsInstall = $true
     }
 } catch {
     Write-Error "Failed to check DHCP Role on $PartnerDC. Error: $_"
@@ -72,28 +74,46 @@ try {
 # 2. Test if DC2 is already authorized in AD
 try {
     $authorizedServers = Get-DhcpServerInDC
-    if ($authorizedServers.DnsName -match$PartnerDC) {
+    if ($authorizedServers.DnsName -match $PartnerDC) {
         Write-Host "[OK] $PartnerDC is already authorized in Active Directory." -ForegroundColor Green
-        $NeedsAuth =$false
+        $NeedsAuth = $false
     } else {
         Write-Host "[!] $PartnerDC is not yet authorized in Active Directory." -ForegroundColor Yellow
-        $NeedsAuth =$true
+        $NeedsAuth = $true
     }
 } catch {
     Write-Error "Failed to check DHCP Authorization. Error: $_"
     exit
 }
 
-# 3. Test if Failover already exists
+# 3. Test if the Server Manager post-deployment warning is cleared on DC2
+try {
+    $configState = Invoke-Command -ComputerName "$PartnerDC" -ArgumentList $ServerManagerKey -ScriptBlock {
+        param($Key)
+        (Get-ItemProperty -Path $Key -Name ConfigurationState -ErrorAction SilentlyContinue).ConfigurationState
+    }
+    if ($configState -eq 2) {
+        Write-Host "[OK] Server Manager post-deployment configuration is complete on $PartnerDC." -ForegroundColor Green
+        $NeedsPostInstall = $false
+    } else {
+        Write-Host "[!] Server Manager post-deployment configuration is not complete on $PartnerDC." -ForegroundColor Yellow
+        $NeedsPostInstall = $true
+    }
+} catch {
+    Write-Error "Failed to check Server Manager status on $PartnerDC. Error: $_"
+    exit
+}
+
+# 4. Test if Failover already exists
 try {
     $failoverName = "$LocalDC-$PartnerDC-Failover"
-    $existingFailover = Get-DhcpServerv4Failover -ComputerName "$LocalDC" -ErrorAction SilentlyContinue | Where-Object {$_.Name -eq$failoverName}
+    $existingFailover = Get-DhcpServerv4Failover -ComputerName "$LocalDC" -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq $failoverName }
     if ($existingFailover) {
         Write-Host "[OK] Failover partnership '$failoverName' already exists." -ForegroundColor Green
-        $NeedsFailover =$false
+        $NeedsFailover = $false
     } else {
         Write-Host "[!] Failover partnership is missing and will be created." -ForegroundColor Yellow
-        $NeedsFailover =$true
+        $NeedsFailover = $true
     }
 } catch {
     Write-Error "Failed to check existing Failover relationships. Error: $_"
@@ -121,7 +141,7 @@ if ($NeedsInstall) {
     Write-Host "Installing DHCP Role including Management Tools on $PartnerDC..."
     try {
         Invoke-Command -ComputerName "$PartnerDC" -ScriptBlock {
-            Install-WindowsFeature -Name DHCP -IncludeManagementTools | Out-Null
+            Install-WindowsFeature -Name DHCP, RSAT-DHCP -IncludeManagementTools | Out-Null
         }
     } catch {
         Write-Error "Failed to install DHCP Role on $PartnerDC. Error: $_"
@@ -129,19 +149,36 @@ if ($NeedsInstall) {
     }
 }
 
-# --- Authorization and clearing Server Manager warning (if needed) ---
+# --- Authorization (if needed) ---
 if ($NeedsAuth) {
     Write-Host "Authorizing DHCP server in AD..."
     try {
         $fqdn = "$PartnerDC.$Domain"
         Add-DhcpServerInDC -DnsName "$fqdn" -IPAddress "$PartnerIP"
-        
-        Write-Host "Updating Server Manager post-deployment status on $PartnerDC..."
-        Invoke-Command -ComputerName "$PartnerDC" -ScriptBlock {
-            Set-ItemProperty -Path "registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\ServerManager\Roles\12" -Name ConfigurationState -Value 2
+    } catch {
+        Write-Error "Failed to authorize DHCP server. Error: $_"
+        exit
+    }
+}
+
+# --- Post-install steps and clearing Server Manager warning (if needed) ---
+if ($NeedsPostInstall) {
+    Write-Host "Completing post-install configuration on $PartnerDC..."
+    try {
+        Invoke-Command -ComputerName "$PartnerDC" -ArgumentList $ServerManagerKey -ScriptBlock {
+            param($Key)
+
+            try {
+                Add-DhcpServerSecurityGroup -ErrorAction Stop
+            } catch {
+                Write-Warning "Could not add the DHCP security groups: $_"
+            }
+
+            Restart-Service -Name DHCPServer
+            Set-ItemProperty -Path $Key -Name ConfigurationState -Value 2
         }
     } catch {
-        Write-Error "Failed to authorize DHCP server or update Server Manager. Error: $_"
+        Write-Error "Failed to complete post-install configuration on $PartnerDC. Error: $_"
         exit
     }
 }
@@ -168,13 +205,68 @@ if ($NeedsFailover) {
     }
 }
 
-# --- Set DNS Order on DC2 (Always run to be sure) ---
-Write-Host "Configuring DNS server options on $PartnerDC (Order: $PartnerIP, $LocalIP)..."
+# --- Copy server options to DC2 and swap the DNS order (Always run to be sure) ---
+Write-Host "Copying DHCP server options from $LocalDC to $PartnerDC..."
 try {
-    Set-DhcpServerv4OptionValue -ComputerName "$PartnerDC" -DnsServer "$PartnerIP", "$LocalIP" -Force
+    $ServerOptions = @(Get-DhcpServerv4OptionValue -ComputerName "$LocalDC")
+
+    foreach ($option in ($ServerOptions | Where-Object { $_.OptionId -ne 6 })) {
+        try {
+            Set-DhcpServerv4OptionValue -ComputerName "$PartnerDC" -OptionId $option.OptionId -Value $option.Value
+            Write-Host "   [OK] Option $($option.OptionId) ($($option.Name)): $($option.Value -join ', ')" -ForegroundColor Green
+        } catch {
+            Write-Warning "   [!] Could not copy option $($option.OptionId) ($($option.Name)). Error: $_"
+        }
+    }
+
+    # Option 6 = DNS servers: same servers as DC1, in reverse order
+    $LocalDns = @(($ServerOptions | Where-Object { $_.OptionId -eq 6 }).Value)
+    if ($LocalDns.Count -ge 2) {
+        $PartnerDns = @($LocalDns[($LocalDns.Count - 1)..0])
+    } else {
+        $PartnerDns = @("$PartnerIP", "$LocalIP")
+    }
+
+    Write-Host "Configuring DNS server options on $PartnerDC (Order: $($PartnerDns -join ', '))..."
+    Set-DhcpServerv4OptionValue -ComputerName "$PartnerDC" -DnsServer $PartnerDns -Force
 } catch {
-    Write-Error "Failed to set DNS server options on $PartnerDC. Error: $_"
+    Write-Error "Failed to set server options on $PartnerDC. Error: $_"
     exit
+}
+
+
+Write-Host "`n==================================================="
+Write-Host " PHASE 3: VERIFYING RESULT"
+Write-Host "==================================================="
+
+$dhcpFeatures = Invoke-Command -ComputerName "$PartnerDC" -ScriptBlock { Get-WindowsFeature -Name DHCP, RSAT-DHCP }
+foreach ($feature in $dhcpFeatures) {
+    Write-Host "Feature $($feature.Name) installed: $($feature.Installed)"
+}
+
+$authorizedPartner = @(Get-DhcpServerInDC | Where-Object { $_.DnsName -match $PartnerDC })
+Write-Host "Authorized in AD: $($authorizedPartner.DnsName -join ', ')"
+
+$configState = Invoke-Command -ComputerName "$PartnerDC" -ArgumentList $ServerManagerKey -ScriptBlock {
+    param($Key)
+    (Get-ItemProperty -Path $Key -Name ConfigurationState -ErrorAction SilentlyContinue).ConfigurationState
+}
+Write-Host "Server Manager ConfigurationState on ${PartnerDC}: $configState (2 = complete)"
+
+$failover = Get-DhcpServerv4Failover -ComputerName "$LocalDC" | Where-Object { $_.Name -eq $failoverName }
+Write-Host "Failover: $($failover.Name) | Partner: $($failover.PartnerServer) | Mode: $($failover.Mode) | State: $($failover.State) | Scopes: $($failover.ScopeId -join ', ')"
+
+foreach ($server in @($LocalDC, $PartnerDC)) {
+    $dnsServers = (Get-DhcpServerv4OptionValue -ComputerName "$server" -OptionId 6).Value
+    Write-Host "DNS servers (server option) on ${server}: $($dnsServers -join ', ')"
+}
+
+# Scope options win over server options and are replicated by the failover
+foreach ($scopeId in $failover.ScopeId) {
+    $scopeDns = Get-DhcpServerv4OptionValue -ComputerName "$PartnerDC" -ScopeId $scopeId -ErrorAction SilentlyContinue | Where-Object { $_.OptionId -eq 6 }
+    if ($scopeDns) {
+        Write-Warning "Scope $scopeId has its own DNS option ($($scopeDns.Value -join ', ')). It overrides the swapped server option on $PartnerDC."
+    }
 }
 
 Write-Host "`nScript successfully completed!" -ForegroundColor Cyan
